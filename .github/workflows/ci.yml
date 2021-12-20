@@ -142,8 +142,8 @@ jobs:
               image=$directory
             fi
             docker buildx build --push --platform linux/amd64,linux/arm64 \
-            -t ghcr.io/${GITHUB_REPOSITORY}/$directory:${{ env.VERSION }} \
-            -t ghcr.io/${GITHUB_REPOSITORY}/$directory:latest \
+            -t ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }} \
+            -t ghcr.io/${GITHUB_REPOSITORY}/$image:latest \
             $directory
           done
       - name: Package and publish to helm registry
