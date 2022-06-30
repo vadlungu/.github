@@ -89,7 +89,7 @@ jobs:
       - name: Show Docker images
         run: docker images | grep ${GITHUB_REPOSITORY} || (echo Docker images not found && exit 1)
       - name: Maven Verify
-        if: inputs.tests == true
+        if: inputs.tests == true && github.event_name != 'release'
         run: |
           sudo echo "172.17.0.1 host.docker.internal" | sudo tee -a /etc/hosts
           sudo echo "127.0.0.1 $(eval hostname)" | sudo tee -a /etc/hosts
