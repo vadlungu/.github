@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: false
+        description: |
+          Artifacts version to publish and for tests.
+          If not specified, then `ref_name`, `head_ref` or `latest` will be used based on event.
+      force-publish:
+        type: boolean
+        required: false
+        default: false
+        description: |
+          Force publish artifacts. 
+          If false, artifacts will be published only on `release` or on `push` to `develop/master`.
+      tests:
+        type: boolean
+        required: false
+        default: true
+        description: Run tests.
+    secrets:
+      ORGANIZATION_TOKEN:
+        required: true
+      HELM_REGISTRY_URL:
+        required: true
+      HELM_REGISTRY_USER:
+        required: true
+      HELM_REGISTRY_PASSWORD:
+        required: true
+
+env:
+  VERSION: >
+    ${{ 
+      inputs.version && inputs.version 
+      || (github.event_name == 'push' || github.event_name == 'release') && github.ref_name 
+      || (github.event_name == 'pull_request') && github.head_ref 
+      || 'latest' 
+    }}
+
+jobs:
+  push:
+    if: >
+      inputs.force-publish == true 
+      || (github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'master'))
+      || github.event_name == 'release'
+    name: Push artifacts
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Overwrite VERSION env
+        run: |
+          echo VERSION=$(echo ${VERSION} | sed 's/\//-/g') >> $GITHUB_ENV
+      - uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Login to Docker
+        run: docker login ghcr.io -u ${GITHUB_ACTOR} --password ${{ secrets.ORGANIZATION_TOKEN }}
+      - name: Package and publish to helm registry
+        run: |
+          for directory in `find ./charts -type d -maxdepth 1 -mindepth 1`
+          do
+            echo helm package for $directory
+            name=$(cat $directory/Chart.yaml | grep ^name: | cut -d: -f2 | cut -c 2- | tr -d '"')
+            chart_version=$(cat $directory/Chart.yaml | grep ^version: | cut -d: -f2 | cut -c 2- | tr -d '"')
+            release_version=$chart_version-${{ env.VERSION }}
+            echo Release chart version $release_version
+            # change helm chart version in Chart.yaml
+            sed -i.bak 's/version:.*/version: '$release_version'/g' $directory/Chart.yaml
+            helm lint --strict $directory || exit 42
+            helm template --debug $directory
+            helm package --debug $directory
+            pkg=$name-$release_version.tgz
+            echo push to GitHub Helm Registry oci://ghcr.io/${{ vars.GH_ORGANIZATION }}/${{ vars.GH_HELM_REGISTRY_REPO }}
+            helm push $pkg oci://ghcr.io/${{ vars.GH_ORGANIZATION }}/${{ vars.GH_HELM_REGISTRY_REPO }}
+            echo push to JFrog Helm Registry
+            curl -sSf -u ${{ secrets.HELM_REGISTRY_USER }}:${{ secrets.HELM_REGISTRY_PASSWORD }} -X PUT -T $pkg ${{ secrets.HELM_REGISTRY_URL }}/$GITHUB_REPOSITORY_OWNER/$name/$pkg
+            # revert changes of helm chart version and remove bak files
+            rm $directory/Chart.yaml
+            mv $directory/Chart.yaml.bak $directory/Chart.yaml
+          done
