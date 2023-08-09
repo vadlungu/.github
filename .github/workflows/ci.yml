@@ -163,8 +163,6 @@ jobs:
             pkg=$name-$release_version.tgz
             echo push to GitHub Helm Registry oci://ghcr.io/${{ vars.GH_ORGANIZATION }}/${{ vars.GH_HELM_REGISTRY_REPO }}
             helm push $pkg oci://ghcr.io/${{ vars.GH_ORGANIZATION }}/${{ vars.GH_HELM_REGISTRY_REPO }}
-            echo push to JFrog Helm Registry
-            curl -sSf -u ${{ secrets.HELM_REGISTRY_USER }}:${{ secrets.HELM_REGISTRY_PASSWORD }} -X PUT -T $pkg ${{ secrets.HELM_REGISTRY_URL }}/$GITHUB_REPOSITORY_OWNER/$name/$pkg
             # revert changes of helm chart version and remove bak files
             rm $directory/Chart.yaml
             mv $directory/Chart.yaml.bak $directory/Chart.yaml
