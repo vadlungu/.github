@@ -94,6 +94,8 @@ jobs:
           sudo echo "172.17.0.1 host.docker.internal" | sudo tee -a /etc/hosts
           sudo echo "127.0.0.1 $(eval hostname)" | sudo tee -a /etc/hosts
           mvn verify -B
+        env:
+          GITHUB_TOKEN: ${{ secrets.ORGANIZATION_TOKEN }}
       - name: Upload test containers logs
         if: always() && inputs.tests == true
         uses: actions/upload-artifact@v2
