@@ -21,6 +21,10 @@ on:
         required: false
         default: true
         description: Run tests.
+      mvn-verify-opts:
+        type: string
+        required: false
+        default: "['']"
     secrets:
       ORGANIZATION_TOKEN:
         required: true
@@ -30,6 +34,10 @@ on:
         required: true
       HELM_REGISTRY_PASSWORD:
         required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   VERSION: >
@@ -42,13 +50,13 @@ env:
 
 jobs:
   build:
-    name: Build (${{ matrix.arch }})
+    name: Build (${{ matrix.arch }}) and mvn verify ${{ matrix.mvn-verify-opts }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        include:
-          - arch: "linux/amd64"
-          # - arch: "linux/arm64"
+        arch: [ 'linux/amd64' ]
+        mvn-verify-opts: ${{ fromJson(inputs.mvn-verify-opts) }}
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK
@@ -93,7 +101,7 @@ jobs:
         run: |
           sudo echo "172.17.0.1 host.docker.internal" | sudo tee -a /etc/hosts
           sudo echo "127.0.0.1 $(eval hostname)" | sudo tee -a /etc/hosts
-          mvn verify -B
+          mvn verify ${{ matrix.mvn-verify-opts }} -B
         env:
           GITHUB_TOKEN: ${{ secrets.ORGANIZATION_TOKEN }}
       - name: Upload test containers logs
