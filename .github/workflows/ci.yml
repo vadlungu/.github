@@ -108,7 +108,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ORGANIZATION_TOKEN }}
       - name: Upload test containers logs
         if: always() && inputs.tests == true
-        uses: actions/upload-artifact@v3.1.3
+        uses: actions/upload-artifact@v4
         with:
           name: test-containers-logs
           path: target/logs/
