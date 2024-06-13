@@ -112,6 +112,7 @@ jobs:
         with:
           name: test-containers-logs
           path: target/logs/
+          overwrite: true
   push:
     if: >
       inputs.force-publish == true 
