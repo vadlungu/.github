@@ -34,6 +34,8 @@ on:
         required: true
       HELM_REGISTRY_PASSWORD:
         required: true
+      GCP_DEB_REGISTRY_CREDENTIALS:
+        required: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -58,9 +60,11 @@ jobs:
         arch: [ 'linux/amd64' ]
         mvn-verify-opts: ${{ fromJson(inputs.mvn-verify-opts) }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
+
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
@@ -125,7 +129,10 @@ jobs:
       - name: Overwrite VERSION env
         run: |
           echo VERSION=$(echo ${VERSION} | sed 's/\//-/g') >> $GITHUB_ENV
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
@@ -180,6 +187,56 @@ jobs:
             rm $directory/Chart.yaml
             mv $directory/Chart.yaml.bak $directory/Chart.yaml
           done
+
+      - name: Authenticate to Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: '${{ vars.GCP_DEB_REGISTRY_PROJECT }}'
+          credentials_json: '${{ secrets.GCP_DEB_REGISTRY_CREDENTIALS}}'
+    
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          version: '>= 363.0.0'
+  
+      - name: Build .deb packages and Push to Google Artifactory DEB Registry
+        run: |
+            for directory in `find * -maxdepth 10 -mindepth 0 -type f -name 'Dockerfile' | xargs dirname`
+            do
+              echo Run package build for $directory
+              if [[ $directory == '.' ]]; then
+                package=${{ github.event.repository.name }}
+              else
+                package=$directory
+              fi
+              export DIRECTORY=$directory
+              echo "DIRECTORY<<EOF" >> ${GITHUB_ENV}
+              echo "${DIRECTORY}" >> ${GITHUB_ENV}
+              echo "EOF" >> ${GITHUB_ENV}
+              if [[ "${{ env.VERSION }}" == *develop* || "${{ env.VERSION }}" == *master* || "${{ env.VERSION }}" != [0-9]* ]]; then
+                 export VERSION=1.0-$(git rev-parse --abbrev-ref HEAD)-$(git describe --tags --abbrev=1 2>/dev/null)-${GITHUB_RUN_ATTEMPT}
+              else
+                 export VERSION=${{ env.VERSION }}-${GITHUB_RUN_ATTEMPT}
+              fi
+              echo "VERSION<<EOF" >> ${GITHUB_ENV}
+              echo "${VERSION}" >> ${GITHUB_ENV}
+              echo "EOF" >> ${GITHUB_ENV}
+              echo Release package version $VERSION
+              if [ -f $directory/src/deb/build-deb.sh ]; then
+                  cd $directory && source ./src/deb/build-deb.sh
+                  PACKAGE_NAME=./target/${SERVICE_NAME}-${VERSION}.deb
+                  echo push to Google Artifactory Debian Registry $DEB_REGISTRY
+                  gcloud artifacts apt upload $DEB_REGISTRY --location=$REGISTRY_LOCATION --source=$PACKAGE_NAME
+                  cd ..
+              else
+                 echo "The file $directory/src/deb/build-deb.sh does not exist in $directory. Skip it."
+              fi
+            done
+        env:
+          DEB_REGISTRY: ${{ vars.GCP_DEB_REGISTRY }}
+          REGISTRY_LOCATION: ${{ vars.GCP_REGISTRY_LOCATION }}
+          DIRECTORY: ${{ env.DIRECTORY }}
+  
       - name: Rollback release
         if: failure() && github.event_name == 'release'
         run: |
