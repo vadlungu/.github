@@ -42,15 +42,15 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IS_RELEASE: ${{ github.event_name == 'release' }}
   VERSION: >
     ${{ 
       inputs.version && inputs.version 
-      || (github.event_name == 'push' || env.IS_RELEASE) && github.ref_name 
+      || (github.event_name == 'push' || github.event_name == 'release') && github.ref_name 
       || (github.event_name == 'pull_request') && github.head_ref 
       || 'latest' 
     }}
   COMMIT_HASH: ${{ github.sha }}
+  IS_RELEASE: ${{ github.event_name == 'release' }}
 
 jobs:
   build:
