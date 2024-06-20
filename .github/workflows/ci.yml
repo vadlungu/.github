@@ -42,13 +42,15 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  IS_RELEASE: ${{ github.event_name == 'release' }}
   VERSION: >
     ${{ 
       inputs.version && inputs.version 
-      || (github.event_name == 'push' || github.event_name == 'release') && github.ref_name 
+      || (github.event_name == 'push' || env.IS_RELEASE) && github.ref_name 
       || (github.event_name == 'pull_request') && github.head_ref 
       || 'latest' 
     }}
+  COMMIT_HASH: ${{ github.sha }}
 
 jobs:
   build:
@@ -173,7 +175,11 @@ jobs:
             echo helm package for $directory
             name=$(cat $directory/Chart.yaml | grep ^name: | cut -d: -f2 | cut -c 2- | tr -d '"')
             chart_version=$(cat $directory/Chart.yaml | grep ^version: | cut -d: -f2 | cut -c 2- | tr -d '"')
-            release_version=$chart_version-${{ env.VERSION }}
+            if [[ ${{ env.IS_RELEASE }} ]]; then
+              release_version=$chart_version-${{ env.VERSION }}
+            else
+              release_version=$chart_version-${{ env.VERSION }}-${{ env.COMMIT_HASH }}
+            fi  
             echo Release chart version $release_version
             # change helm chart version in Chart.yaml
             sed -i.bak 's/version:.*/version: '$release_version'/g' $directory/Chart.yaml
@@ -213,10 +219,10 @@ jobs:
               echo "DIRECTORY<<EOF" >> ${GITHUB_ENV}
               echo "${DIRECTORY}" >> ${GITHUB_ENV}
               echo "EOF" >> ${GITHUB_ENV}
-              if [[ "${{ env.VERSION }}" == *develop* || "${{ env.VERSION }}" == *master* || "${{ env.VERSION }}" != [0-9]* ]]; then
-                 export VERSION=1.0-$(git rev-parse --abbrev-ref HEAD)-$(git describe --tags --abbrev=1 2>/dev/null)-${GITHUB_RUN_ATTEMPT}
+              if [[ ${{ env.IS_RELEASE }} ]]; then
+                 export VERSION=${{ env.VERSION }}
               else
-                 export VERSION=${{ env.VERSION }}-${GITHUB_RUN_ATTEMPT}
+                 export VERSION=1.0-${{ env.VERSION }}-${{ env.COMMIT_HASH }}
               fi
               echo "VERSION<<EOF" >> ${GITHUB_ENV}
               echo "${VERSION}" >> ${GITHUB_ENV}
