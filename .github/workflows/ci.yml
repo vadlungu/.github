@@ -181,7 +181,9 @@ jobs:
             fi  
             echo Release chart version $release_version
             # change helm chart version in Chart.yaml
-            sed -i.bak 's/version:.*/version: '$release_version'/g' $directory/Chart.yaml
+            sed -i.bak 's/version:.*/version: '$release_version'/g' $directory/Chart.yaml            
+            # change helm chart SHA in values.yaml
+            sed -i.bak 's/SHA:.*/SHA: '${{ env.COMMIT_HASH }}'/g' $directory/values.yaml
             helm lint --strict $directory || exit 42
             helm template --debug $directory
             helm package --debug $directory
