@@ -166,7 +166,7 @@ jobs:
             -t ghcr.io/${GITHUB_REPOSITORY}/$image:latest \
             $directory
           done
-      - name: Set up Trivy
+      - name: Set up Trivy 1
         uses: aquasecurity/trivy-action@0.20.0
         id: trivy
 
