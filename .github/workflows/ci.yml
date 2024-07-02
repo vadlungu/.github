@@ -167,25 +167,25 @@ jobs:
             $directory
           done
 
-      - name: Install Trivy
-        run: |
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
-
-      - name: Verify Trivy Installation
-        run: trivy --version
-
-      - name: Trivy scan images
-        run: |
-          for directory in `find * -maxdepth 10 -mindepth 0 -type f -name 'Dockerfile' | xargs dirname`
-          do
-            echo Run docker build for $directory
-            if [[ $directory == '.' ]]; then
-              image=${{ github.event.repository.name }}
-            else
-              image=$directory
-            fi
-            trivy image --quiet --severity CRITICAL,HIGH --exit-code 1 ghcr.io/${{ github.repository }}/$image:${{ env.VERSION }}
-          done
+      #      - name: Install Trivy
+      #        run: |
+      #          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+      #
+      #      - name: Verify Trivy Installation
+      #        run: trivy --version
+      #
+      #      - name: Trivy scan images
+      #        run: |
+      #          for directory in `find * -maxdepth 10 -mindepth 0 -type f -name 'Dockerfile' | xargs dirname`
+      #          do
+      #            echo Run docker build for $directory
+      #            if [[ $directory == '.' ]]; then
+      #              image=${{ github.event.repository.name }}
+      #            else
+      #              image=$directory
+      #            fi
+      #            trivy image --quiet --severity CRITICAL,HIGH --exit-code 1 ghcr.io/${{ github.repository }}/$image:${{ env.VERSION }}
+      #          done
       - name: Package and publish to helm registry
         run: |
           for directory in `find ./charts -type d -maxdepth 1 -mindepth 1`
@@ -267,3 +267,29 @@ jobs:
         run: |
           echo Remove git tag
           git push origin :refs/tags/${{ github.event.release.tag_name }}
+  scan:
+    if: >
+      inputs.force-publish == true 
+      || (github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'master' || github.ref_name == 'trivy' ))
+      || github.event_name == 'release' 
+    name: Push artifacts
+    needs: build
+    strategy:
+      matrix:
+        image: ${{ fromJson(needs.build.outputs.images) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+
+      - name: Verify Trivy Installation
+        run: trivy --version
+
+      - name: Scan Docker image with Trivy
+        run: |
+          echo "Scanning ${{ matrix.image }}"
+          trivy image --severity CRITICAL,HIGH ${{ matrix.image }}
