@@ -54,6 +54,8 @@ jobs:
   build:
     name: Build (${{ matrix.arch }}) and mvn verify ${{ matrix.mvn-verify-opts }}
     runs-on: ubuntu-latest
+    #    outputs:
+    #      images: ${{ steps.dockerImages.outputs }
     strategy:
       fail-fast: false
       matrix:
@@ -101,6 +103,7 @@ jobs:
             $directory
           done
       - name: Show Docker images
+        id: dockerImages
         run: docker images | grep ${GITHUB_REPOSITORY} || (echo Docker images not found && exit 1)
       - name: Maven Verify
         if: inputs.tests == true && github.event_name != 'release'
@@ -153,20 +156,23 @@ jobs:
         run: docker login ghcr.io -u ${GITHUB_ACTOR} --password ${{ secrets.ORGANIZATION_TOKEN }}
       - name: Push Docker images
         run: |
+          VERSION=$(date +%Y%m%d%H%M%S)
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          IMAGES=""
           for directory in `find * -maxdepth 10 -mindepth 0 -type f -name 'Dockerfile' | xargs dirname`
           do
-            echo Run docker build for $directory
             if [[ $directory == '.' ]]; then
               image=${{ github.event.repository.name }}
             else
               image=$directory
             fi
             docker buildx build --push --platform linux/amd64,linux/arm64 \
-            -t ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }} \
-            -t ghcr.io/${GITHUB_REPOSITORY}/$image:latest \
+            -t ghcr.io/${{ github.repository }}/$image:${VERSION} \
+            -t ghcr.io/${{ github.repository }}/$image:latest \
             $directory
+            IMAGES="$IMAGES ghcr.io/${{ github.repository }}/$image:${VERSION}"
           done
-
+          echo "images=$IMAGES" >> $GITHUB_ENV
       #      - name: Install Trivy
       #        run: |
       #          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
