@@ -166,6 +166,26 @@ jobs:
             -t ghcr.io/${GITHUB_REPOSITORY}/$image:latest \
             $directory
           done
+      - name: Set up Trivy
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+      - name: Trivy scan images
+        run: |
+          for directory in `find * -maxdepth 10 -mindepth 0 -type f -name 'Dockerfile' | xargs dirname`
+          do
+            echo Run docker build for $directory
+            if [[ $directory == '.' ]]; then
+              image=${{ github.event.repository.name }}
+            else
+              image=$directory
+            fi
+            trivy image --severity CRITICAL,HIGH --exit-code 1 ghcr.io/${{ github.repository }}/$image:${{ env.VERSION }}
+          done
       - name: Package and publish to helm registry
         run: |
           for directory in `find ./charts -type d -maxdepth 1 -mindepth 1`
