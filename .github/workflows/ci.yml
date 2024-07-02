@@ -67,18 +67,18 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'zulu'
-          cache: 'maven'
-      - name: Set up Maven
-        run: cp build.settings.xml ~/.m2/settings.xml
-      - name: Maven Build
-        run: mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -Ddockerfile.skip=true -Dgithub.event.release.prerelease="${{ github.event.release.prerelease }}" -B -V -U
-        env:
-          GITHUB_TOKEN: ${{ secrets.ORGANIZATION_TOKEN }}
+      #      - name: Set up JDK
+      #        uses: actions/setup-java@v3
+      #        with:
+      #          java-version: '17'
+      #          distribution: 'zulu'
+      #          cache: 'maven'
+      #      - name: Set up Maven
+      #        run: cp build.settings.xml ~/.m2/settings.xml
+      #      - name: Maven Build
+      #        run: mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -Ddockerfile.skip=true -Dgithub.event.release.prerelease="${{ github.event.release.prerelease }}" -B -V -U
+      #        env:
+      #          GITHUB_TOKEN: ${{ secrets.ORGANIZATION_TOKEN }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -136,18 +136,18 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'zulu'
-          cache: 'maven'
-      - name: Set up Maven
-        run: cp build.settings.xml ~/.m2/settings.xml
-      - name: Maven Build
-        run: mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -Ddockerfile.skip=true -Dgithub.event.release.prerelease="${{ github.event.release.prerelease }}" -B -V -U
-        env:
-          GITHUB_TOKEN: ${{ secrets.ORGANIZATION_TOKEN }}
+      #      - name: Set up JDK
+      #        uses: actions/setup-java@v3
+      #        with:
+      #          java-version: '17'
+      #          distribution: 'zulu'
+      #          cache: 'maven'
+      #      - name: Set up Maven
+      #        run: cp build.settings.xml ~/.m2/settings.xml
+      #      - name: Maven Build
+      #        run: mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -Ddockerfile.skip=true -Dgithub.event.release.prerelease="${{ github.event.release.prerelease }}" -B -V -U
+      #        env:
+      #          GITHUB_TOKEN: ${{ secrets.ORGANIZATION_TOKEN }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
@@ -288,6 +288,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Test matrix
+        run: |
+          echo ${{ fromJson(needs.build.outputs.images) }}
 
       - name: Install Trivy
         run: |
