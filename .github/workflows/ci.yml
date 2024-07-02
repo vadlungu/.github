@@ -275,6 +275,7 @@ jobs:
     name: Push artifacts
     needs: build
     strategy:
+      fail-fast: false
       matrix:
         image: ${{ fromJson(needs.build.outputs.images) }}
     runs-on: ubuntu-latest
