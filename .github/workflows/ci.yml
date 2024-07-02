@@ -166,9 +166,13 @@ jobs:
             -t ghcr.io/${GITHUB_REPOSITORY}/$image:latest \
             $directory
           done
-      - name: Set up Trivy 1
-        uses: aquasecurity/trivy-action@0.20.0
-        id: trivy
+
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+
+      - name: Verify Trivy Installation
+        run: trivy --version
 
       - name: Trivy scan images
         run: |
