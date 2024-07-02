@@ -168,13 +168,8 @@ jobs:
           done
       - name: Set up Trivy
         uses: aquasecurity/trivy-action@0.20.0
-        with:
-          image-ref: 'alpine'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+        id: trivy
+
       - name: Trivy scan images
         run: |
           for directory in `find * -maxdepth 10 -mindepth 0 -type f -name 'Dockerfile' | xargs dirname`
