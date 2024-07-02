@@ -282,10 +282,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        #image: ${{ fromJson(needs.build.outputs.images) }}
-        image: 
-          - 1 
-          - 2
+        arch: [ 'linux/amd64' ]
+        image: ${{ fromJson(inputs.mvn-verify-opts) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
