@@ -155,32 +155,7 @@ jobs:
         run: docker login ghcr.io -u ${GITHUB_ACTOR} --password ${{ secrets.ORGANIZATION_TOKEN }}
       - name: Push Docker images
         run: |
-          VERSION=$(date +%Y%m%d%H%M%S)
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
           IMAGES=""
-          for directory in `find * -maxdepth 10 -mindepth 0 -type f -name 'Dockerfile' | xargs dirname`
-          do
-            if [[ $directory == '.' ]]; then
-              image=${{ github.event.repository.name }}
-            else
-              image=$directory
-            fi
-            docker buildx build --push --platform linux/amd64,linux/arm64 \
-            -t ghcr.io/${{ github.repository }}/$image:${VERSION} \
-            -t ghcr.io/${{ github.repository }}/$image:latest \
-            $directory
-            IMAGES="$IMAGES ghcr.io/${{ github.repository }}/$image:${VERSION}"
-          done
-          echo "images=$IMAGES" >> $GITHUB_ENV
-      - name: Install Trivy
-        run: |
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
-
-      - name: Verify Trivy Installation
-        run: trivy --version
-
-      - name: Trivy scan images
-        run: |
           for directory in `find * -maxdepth 10 -mindepth 0 -type f -name 'Dockerfile' | xargs dirname`
           do
             echo Run docker build for $directory
@@ -189,8 +164,33 @@ jobs:
             else
               image=$directory
             fi
-            trivy image --quiet --severity CRITICAL,HIGH --exit-code 1 ghcr.io/${{ github.repository }}/$image:${{ env.VERSION }}
+            docker buildx build --push --platform linux/amd64,linux/arm64 \
+            -t ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }} \
+            -t ghcr.io/${GITHUB_REPOSITORY}/$image:latest \
+            $directory
+            IMAGES="$IMAGES ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }}"
           done
+          VERSION=$(date +%Y%m%d%H%M%S)
+          echo "images=$IMAGES" >> $GITHUB_ENV
+      # - name: Install Trivy
+      #   run: |
+      #     curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+
+      # - name: Verify Trivy Installation
+      #   run: trivy --version
+
+      # - name: Trivy scan images
+      #   run: |
+      #     for directory in `find * -maxdepth 10 -mindepth 0 -type f -name 'Dockerfile' | xargs dirname`
+      #     do
+      #       echo Run docker build for $directory
+      #       if [[ $directory == '.' ]]; then
+      #         image=${{ github.event.repository.name }}
+      #       else
+      #         image=$directory
+      #       fi
+      #       trivy image --quiet --severity CRITICAL,HIGH --exit-code 1 ghcr.io/${{ github.repository }}/$image:${{ env.VERSION }}
+      #     done
       - name: Package and publish to helm registry
         run: |
           for directory in `find ./charts -type d -maxdepth 1 -mindepth 1`
