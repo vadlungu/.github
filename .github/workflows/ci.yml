@@ -255,15 +255,16 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+          github-pat: ${{ secrets.ORGANIZATION_TOKEN }}
         env:
           TRIVY_USERNAME: ${GITHUB_ACTOR}
           TRIVY_PASSWORD: ${{ secrets.ORGANIZATION_TOKEN }}
 
-      - name: Test img outputs
-        run: |
-          echo ${{ needs.push.outputses }}
-          echo "##############################"
-          echo ${{ fromJson(needs.build.outputs.images) }}
+      #- name: Test img outputs
+      #  run: |
+      #    echo ${{ needs.push.outputses }}
+      #    echo "##############################"
+      #    echo ${{ fromJson(needs.build.outputs.images) }}
           
 
       - name: Install Trivy
