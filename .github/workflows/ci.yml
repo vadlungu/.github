@@ -221,7 +221,7 @@ jobs:
         scanner: [ 'trivy' ]
         image:
           - "ghcr.io/exberry-io/fix-gateway/fix-gateway:trivy"
-          - "ghcr.io/exberry-io/fix-gateway/fix-gateway-benchmark:trivy"
+          - "ghcr.io/exberry-io/fix-gateway/fix-gateway-benchmarks:trivy"
           
     runs-on: ubuntu-latest
     steps:
