@@ -54,13 +54,14 @@ jobs:
   build:
     name: Build (${{ matrix.arch }}) and mvn verify ${{ matrix.mvn-verify-opts }}
     runs-on: ubuntu-latest
-    #    outputs:
-    #      images: ${{ steps.dockerImages.outputs }
+    outputs:
+      images: ${{ steps.dockerBuild.outputs.images }
     strategy:
       fail-fast: false
       matrix:
         arch: [ 'linux/amd64' ]
         mvn-verify-opts: ${{ fromJson(inputs.mvn-verify-opts) }}
+        images: ${{ steps.dockerBuild.outputs.images }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -88,7 +89,9 @@ jobs:
         run: |
           echo TEST_IMAGE_TAG=$(echo ${VERSION} | sed 's/\//-/g') >> $GITHUB_ENV
       - name: Build Docker images
+        id: dockerBuild
         run: |
+          IMAGES=()
           for directory in `find * -maxdepth 10 -mindepth 0 -type f -name 'Dockerfile' | xargs dirname`
           do
             echo Run docker buildx build for $directory
@@ -100,7 +103,28 @@ jobs:
             docker buildx build --load --platform ${{ matrix.arch }} \
             -t ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.TEST_IMAGE_TAG }} \
             $directory
+            IMAGES+=(\"ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }}\")
           done
+          json_array="["
+          for element in "${IMAGES[@]}"; do
+              json_array+="$element,"
+          done
+          json_array="${json_array%,}]"
+          echo "::set-output name=img::$json_array"
+
+          VERSION=$(date +%Y%m%d%H%M%S)
+          echo "images=$json_array" >> $GITHUB_OUTPUT
+      - name: Trivy simple test
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ matrix.images }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          github-pat: ${{ secrets.ORGANIZATION_TOKEN }}
+
       - name: Show Docker images
         id: dockerImages
         run: docker images | grep ${GITHUB_REPOSITORY} || (echo Docker images not found && exit 1)
