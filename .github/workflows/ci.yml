@@ -299,7 +299,10 @@ jobs:
       fail-fast: false
       matrix:
         scanner: [ 'trivy' ]
-        image: ${{ fromJson(needs.build.outputs.images) }}
+        image:
+          - "ghcr.io/exberry-io/fix-gateway/fix-gateway:trivy"
+          - "ghcr.io/exberry-io/fix-gateway/fix-gateway-benchmark:trivy"
+          
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -318,6 +321,8 @@ jobs:
       - name: Test img outputs
         run: |
           echo ${{ needs.push.outputs.images }}
+          echo "##############################"
+          echo ${{ fromJson(needs.build.outputs.images) }}
 
       - name: Install Trivy
         run: |
