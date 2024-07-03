@@ -297,7 +297,7 @@ jobs:
       #    echo ${{ fromJson(needs.build.outputs.images) }}
       - name: Test img outputs
         run: |
-          echo ${{ fromJson(needs.push.outputs.images) }}
+          echo needs.push.outputs.images)
 
       - name: Install Trivy
         run: |
