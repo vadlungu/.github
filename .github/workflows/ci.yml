@@ -55,7 +55,7 @@ jobs:
     name: Build (${{ matrix.arch }}) and mvn verify ${{ matrix.mvn-verify-opts }}
     runs-on: ubuntu-latest
     outputs:
-      images: ${{ steps.dockerBuild.outputs.images }}
+      images: ${{ jobs.build.outputs.images }}
     strategy:
       fail-fast: false
       matrix:
