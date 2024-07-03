@@ -120,6 +120,8 @@ jobs:
           path: target/logs/
           overwrite: true
   push:
+    outputs:
+     images: ${{ steps.pushDockerImages.outputs.images }}
     if: >
       inputs.force-publish == true 
       || (github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'master' || github.ref_name == 'trivy' ))
@@ -154,6 +156,7 @@ jobs:
       - name: Login to Docker
         run: docker login ghcr.io -u ${GITHUB_ACTOR} --password ${{ secrets.ORGANIZATION_TOKEN }}
       - name: Push Docker images
+        id: pushDockerImages
         run: |
           IMAGES=""
           for directory in `find * -maxdepth 10 -mindepth 0 -type f -name 'Dockerfile' | xargs dirname`
@@ -278,7 +281,7 @@ jobs:
       || (github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'master' || github.ref_name == 'trivy' ))
       || github.event_name == 'release' 
     name: Push artifacts
-    needs: build
+    needs: push
     strategy:
       fail-fast: false
       matrix:
@@ -292,6 +295,9 @@ jobs:
       #- name: Test matrix
       #  run: |
       #    echo ${{ fromJson(needs.build.outputs.images) }}
+      - name: Test img outputs
+        run: |
+          echo ${{ fromJson(needs.push.outputs.images) }}
 
       - name: Install Trivy
         run: |
