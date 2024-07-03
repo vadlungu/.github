@@ -283,15 +283,15 @@ jobs:
       fail-fast: false
       matrix:
         arch: [ 'linux/amd64' ]
-        image: ${{ fromJson(inputs.mvn-verify-opts) }}
+        image: ["ubuntu"]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Test matrix
-        run: |
-          echo ${{ fromJson(needs.build.outputs.images) }}
+      #- name: Test matrix
+      #  run: |
+      #    echo ${{ fromJson(needs.build.outputs.images) }}
 
       - name: Install Trivy
         run: |
