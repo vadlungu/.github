@@ -289,7 +289,7 @@ jobs:
       fail-fast: false
       matrix:
         scanner: [ 'trivy' ]
-        image: ${{ needs.push.outputs.images }}
+        image: ${{ fromJson(needs.push.outputs.images) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
