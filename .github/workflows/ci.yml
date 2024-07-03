@@ -295,9 +295,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      #- name: Test matrix
-      #  run: |
-      #    echo ${{ fromJson(needs.build.outputs.images) }}
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ matrix.image }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
       - name: Test img outputs
         run: |
           echo ${{ needs.push.outputs.images }}
