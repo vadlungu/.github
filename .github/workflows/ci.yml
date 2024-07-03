@@ -283,12 +283,12 @@ jobs:
       inputs.force-publish == true 
       || (github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'master' || github.ref_name == 'trivy' ))
       || github.event_name == 'release' 
-    name: Scan ${{ matrix.image }}
+    name: ${{ matrix.scanner }} scan ${{ matrix.image }}
     needs: push
     strategy:
       fail-fast: false
       matrix:
-        arch: [ 'linux/amd64' ]
+        scanner: [ 'trivy' ]
         image: ${{ needs.push.outputs.images }}
     runs-on: ubuntu-latest
     steps:
