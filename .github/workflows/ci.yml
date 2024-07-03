@@ -171,7 +171,7 @@ jobs:
             -t ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }} \
             -t ghcr.io/${GITHUB_REPOSITORY}/$image:latest \
             $directory
-            IMAGES+=(ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }})
+            IMAGES+=(\"ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }}\")
           done
           # Convert the array to a JSON string
           json_array="["
@@ -179,6 +179,7 @@ jobs:
               json_array+="$element,"
           done
           json_array="${json_array%,}]"
+          echo "::set-output name=img::$json_array"
 
           VERSION=$(date +%Y%m%d%H%M%S)
           echo "images=$json_array" >> $GITHUB_OUTPUT
@@ -242,6 +243,9 @@ jobs:
           echo ${{ needs.push.outputs.images }}
           echo "##############################"
           echo ${{ fromJson(needs.build.outputs.images) }}
+          echo "##############################"
+          echo ${{ fromJson(needs.build.outputs.img) }}
+          
 
       - name: Install Trivy
         run: |
