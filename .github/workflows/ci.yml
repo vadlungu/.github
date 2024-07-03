@@ -174,8 +174,7 @@ jobs:
             IMAGES+=(ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }})
           done
           VERSION=$(date +%Y%m%d%H%M%S)
-          echo "images=$IMAGES" >> $GITHUB_ENV
-          echo "images=[$IMAGES]" >> $GITHUB_OUTPUT
+          echo "images=[${IMAGES[*]}]" >> $GITHUB_OUTPUT
 
           echo $VERSION
           echo $IMAGES
