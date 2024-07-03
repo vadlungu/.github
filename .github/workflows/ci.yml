@@ -61,7 +61,7 @@ jobs:
       matrix:
         arch: [ 'linux/amd64' ]
         mvn-verify-opts: ${{ fromJson(inputs.mvn-verify-opts) }}
-        images: ${{ steps.dockerBuild.outputs.images }}
+        images: ${{ jobs.build.outputs.images }}
     steps:
       - uses: actions/checkout@v4
         with:
