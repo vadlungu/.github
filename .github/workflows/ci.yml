@@ -240,6 +240,7 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+          github-pat: ${{ secrets.ORGANIZATION_TOKEN }}
 
       - name: Test img outputs
         run: |
