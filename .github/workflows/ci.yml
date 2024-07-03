@@ -173,6 +173,7 @@ jobs:
             $directory
             IMAGES+=(ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }})
           done
+          echo "img=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${IMAGES[@]})" >> $GIT_OUTPUT
           # Convert the array to a JSON string
           json_array="["
           for element in "${IMAGES[@]}"; do
@@ -188,6 +189,8 @@ jobs:
           echo $IMAGES
           echo "####################################"
           echo $json_array
+          echo "####################################"
+          echo $img
       # - name: Install Trivy
       #   run: |
       #     curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
