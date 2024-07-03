@@ -175,6 +175,9 @@ jobs:
           done
           VERSION=$(date +%Y%m%d%H%M%S)
           echo "images=$IMAGES" >> $GITHUB_ENV
+
+          echo $VERSION
+          echo $IMAGES
       # - name: Install Trivy
       #   run: |
       #     curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
