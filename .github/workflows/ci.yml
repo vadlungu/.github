@@ -231,6 +231,18 @@ jobs:
       - name: Login to Docker
         run: docker login ghcr.io -u ${GITHUB_ACTOR} --password ${{ secrets.ORGANIZATION_TOKEN }}
 
+      - name: Trivy simple test
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: "ghcr.io/exberry-io/fix-gateway/fix-gateway:triv"
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          github-pat: ${{ secrets.ORGANIZATION_TOKEN }}
+
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.20.0
         with:
