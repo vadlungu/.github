@@ -193,6 +193,7 @@ jobs:
         uses: anchore/scan-action@v3
         with:
           path: "."    
+          output-format: 'table'
           fail-build: false
       # - name: Install Trivy
       #   run: |
