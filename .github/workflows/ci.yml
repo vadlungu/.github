@@ -189,10 +189,6 @@ jobs:
           echo $IMAGES
           echo "####################################"
           echo $json_array
-      - name: Push Docker images
-        id: matrixImagesDebug
-        run: |
-           echo "Images matrix value is ${{IMAGES}}"
       - name: Anchore scan current project
         uses: anchore/scan-action@v3
         with:
