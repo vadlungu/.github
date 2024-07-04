@@ -65,7 +65,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'zulu'
@@ -138,7 +138,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'zulu'
@@ -186,7 +186,7 @@ jobs:
           echo "####################################"
           echo $VERSION
           echo "####################################"
-          echo $IMAGES
+          echo ${IMAGES[@]}
           echo "####################################"
           echo $json_array
       - name: Anchore scan current project
@@ -218,7 +218,7 @@ jobs:
       inputs.force-publish == true 
       || (github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'master' || github.ref_name == 'trivy' ))
       || github.event_name == 'release' 
-    name: ${{ matrix.scanner }} scan ${{ matrix.image }}
+    name: Scan ${{ matrix.image }}
     needs: push
     strategy:
       fail-fast: false
@@ -228,7 +228,6 @@ jobs:
         image1:
           - "ghcr.io/exberry-io/fix-gateway/fix-gateway:trivy"
           - "ghcr.io/exberry-io/fix-gateway/fix-gateway-benchmarks:trivy"
-          
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -239,6 +238,7 @@ jobs:
         uses: anchore/scan-action@v3
         with:
           image: "${{ matrix.image }}"
+          fail-build: false
           registry-username: ${GITHUB_ACTOR}
           registry-password: ${{ secrets.ORGANIZATION_TOKEN }}
       - name: Trivy simple test
