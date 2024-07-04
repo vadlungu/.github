@@ -189,6 +189,14 @@ jobs:
           echo $IMAGES
           echo "####################################"
           echo $json_array
+      - name: Push Docker images
+        id: matrixImagesDebug
+        run: |
+           echo "Images matrix value is ${{IMAGES}}"
+      - name: Anchore scan current project
+        uses: anchore/scan-action@v3
+        with:
+          path: "."    
       # - name: Install Trivy
       #   run: |
       #     curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
@@ -228,10 +236,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Login to Docker
         run: docker login ghcr.io -u ${GITHUB_ACTOR} --password ${{ secrets.ORGANIZATION_TOKEN }}
-
+      - name: Anchore scan image
+        uses: anchore/scan-action@v3
+        with:
+          image: "localbuild/testimage:latest"
       - name: Trivy simple test
         uses: aquasecurity/trivy-action@0.20.0
         with:
