@@ -263,7 +263,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: "ghcr.io/exberry-io/fix-gateway/fix-gateway:trivy"
-          format: 'github'
+          format: 'sarif'
           exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
