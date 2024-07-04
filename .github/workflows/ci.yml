@@ -269,9 +269,14 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
           github-pat: ${{ secrets.ORGANIZATION_TOKEN }}
+          output: 'trivy-results.sarif'
         env:
           TRIVY_USERNAME: ${GITHUB_ACTOR}
           TRIVY_PASSWORD: ${{ secrets.ORGANIZATION_TOKEN }}
+      - name: Trivy SARIF upload to github
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
 
 
 
