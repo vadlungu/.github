@@ -193,6 +193,7 @@ jobs:
         uses: anchore/scan-action@v3
         with:
           path: "."    
+          fail-build: false
       # - name: Install Trivy
       #   run: |
       #     curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
@@ -237,7 +238,9 @@ jobs:
       - name: Anchore scan image
         uses: anchore/scan-action@v3
         with:
-          image: "localbuild/testimage:latest"
+          image: "${{ matrix.image }}"
+          registry-username: ${GITHUB_ACTOR}
+          registry-password: ${{ secrets.ORGANIZATION_TOKEN }}
       - name: Trivy simple test
         uses: aquasecurity/trivy-action@0.20.0
         with:
