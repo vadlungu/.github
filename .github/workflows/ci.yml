@@ -259,6 +259,20 @@ jobs:
         env:
           TRIVY_USERNAME: ${GITHUB_ACTOR}
           TRIVY_PASSWORD: ${{ secrets.ORGANIZATION_TOKEN }}
+      - name: Trivy SARIF test
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "ghcr.io/exberry-io/fix-gateway/fix-gateway:trivy"
+          format: 'github'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          github-pat: ${{ secrets.ORGANIZATION_TOKEN }}
+        env:
+          TRIVY_USERNAME: ${GITHUB_ACTOR}
+          TRIVY_PASSWORD: ${{ secrets.ORGANIZATION_TOKEN }}
+
 
 
       - name: Run Trivy vulnerability scanner
