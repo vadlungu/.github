@@ -234,10 +234,14 @@ jobs:
         uses: actions/checkout@v4
       - name: Login to Docker
         run: docker login ghcr.io -u ${GITHUB_ACTOR} --password ${{ secrets.ORGANIZATION_TOKEN }}
+      - name: Check image list
+        run:
+          echo ${{ fromJson(needs.push.outputs.images) }}
       - name: Anchore scan image
         uses: anchore/scan-action@v3
         with:
           image: "${{ matrix.image }}"
+          output-format: 'table'
           fail-build: false
           registry-username: ${GITHUB_ACTOR}
           registry-password: ${{ secrets.ORGANIZATION_TOKEN }}
