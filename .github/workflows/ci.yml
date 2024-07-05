@@ -249,7 +249,7 @@ jobs:
       - name: Trivy simple test
         uses: aquasecurity/trivy-action@0.20.0
         with:
-          image-ref: "ghcr.io/exberry-io/fix-gateway/fix-gateway:trivy"
+          image-ref: ${{ matrix.image }}
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
