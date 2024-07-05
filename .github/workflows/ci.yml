@@ -224,11 +224,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scanner: [ 'trivy' ]
+        #scanner: [ 'trivy' ]
         image: ${{ fromJson(needs.push.outputs.images) }}
-        image1:
-          - "ghcr.io/exberry-io/fix-gateway/fix-gateway:trivy"
-          - "ghcr.io/exberry-io/fix-gateway/fix-gateway-benchmarks:trivy"
+        #  image1:
+        #    - "ghcr.io/exberry-io/fix-gateway/fix-gateway:trivy"
+        #    - "ghcr.io/exberry-io/fix-gateway/fix-gateway-benchmarks:trivy"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
