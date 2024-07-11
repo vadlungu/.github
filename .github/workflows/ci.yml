@@ -311,6 +311,33 @@ jobs:
           TRIVY_USERNAME: ${GITHUB_ACTOR}
           TRIVY_PASSWORD: ${{ secrets.ORGANIZATION_TOKEN }}
 
+      - name: Make trivy template file with heredoc
+        run: |
+          cat << 'EOF' > template.tpl 
+          {{- $critical := 0 }}
+          {{- $high := 0 }}
+
+          {{- range . }}
+            {{- range .Vulnerabilities }}
+              {{- if  eq .Severity "CRITICAL" }}
+                {{- $critical = add $critical 1 }}
+              {{- end }}
+              {{- if  eq .Severity "HIGH" }}
+                {{- $high = add $high 1 }}
+              {{- end }}
+            {{- end }}
+          {{- end }}
+
+          | VulnerabilityID | Severity |
+          | - | - |
+          {{- range .}}
+            {{- range .Vulnerabilities }}
+            | {{ .VulnerabilityID }} |  {{ .Severity }} |
+            {{- end }}
+          {{- end }}
+          | Total Critical | {{ $critical }} |
+          | Total High | {{ $high }} |
+          EOF
       - name: Trivy template vulnerability test
         uses: aquasecurity/trivy-action@0.24.0
         with:
@@ -318,7 +345,7 @@ jobs:
           scan-type: image
           hide-progress: true
           format: 'template'
-          template: '@dotconfig/tirvy/template.tpl'
+          template: '@template.tpl'
           exit-code: '0'
           ignore-unfixed: true
           vuln-type: 'os,library'
