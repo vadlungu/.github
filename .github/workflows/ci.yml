@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: test
-        run: echo '### Hello world! 🚀' >> $GITHUB_STEP_SUMMARY
+        run: echo '# Test 🚀' >> $GITHUB_STEP_SUMMARY
   build:
     name: Build (${{ matrix.arch }}) and mvn verify ${{ matrix.mvn-verify-opts }}
     runs-on: ubuntu-latest
@@ -66,6 +66,8 @@ jobs:
         arch: [ 'linux/amd64' ]
         mvn-verify-opts: ${{ fromJson(inputs.mvn-verify-opts) }}
     steps:
+      - name: test
+        run: echo '# Build 🚀' >> $GITHUB_STEP_SUMMARY
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -136,6 +138,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: test
+        run: echo '# Push 🚀' >> $GITHUB_STEP_SUMMARY
       - name: Overwrite VERSION env
         run: |
           echo VERSION=$(echo ${VERSION} | sed 's/\//-/g') >> $GITHUB_ENV
@@ -165,9 +169,9 @@ jobs:
         id: pushDockerImages
         run: |
           IMAGES=()
-          echo "# Docker Images >> $GITHUB_STEP_SUMMARY"
-          echo "| Image Name | >> $GITHUB_STEP_SUMMARY"
-          echo "| - | >> $GITHUB_STEP_SUMMARY"
+          echo "## Docker Images" >> $GITHUB_STEP_SUMMARY"
+          echo "| Image Name |" >> $GITHUB_STEP_SUMMARY"
+          echo "| - | ">> $GITHUB_STEP_SUMMARY"
           for directory in `find * -maxdepth 10 -mindepth 0 -type f -name 'Dockerfile' | xargs dirname`
           do
             echo Run docker build for $directory
@@ -180,7 +184,7 @@ jobs:
             -t ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }} \
             -t ghcr.io/${GITHUB_REPOSITORY}/$image:latest \
             $directory
-            echo "| ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }} | >> $GITHUB_STEP_SUMMARY"
+            echo "| ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }} |" >> $GITHUB_STEP_SUMMARY"
             IMAGES+=(\"ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }}\")
           done
           # Convert the array to a JSON string
