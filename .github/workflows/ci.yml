@@ -332,7 +332,7 @@ jobs:
           | - | - |
           {{- range .}}
             {{- range .Vulnerabilities }}
-            | {{ .VulnerabilityID }} |  {{ .Severity }} |
+          | {{ .VulnerabilityID }} |  {{ .Severity }} |
             {{- end }}
           {{- end }}
           | Total Critical | {{ $critical }} |
@@ -361,7 +361,7 @@ jobs:
       #    echo "##############################"
       #    echo ${{ fromJson(needs.build.outputs.images) }}
       - name: Verify Trivy Installation
-        run: cat scan-results.md
+        run: cat scan-results.md >> $GITHUB_STEP_SUMMARY
           
 
       - name: Install Trivy
