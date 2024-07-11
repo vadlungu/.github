@@ -165,6 +165,9 @@ jobs:
         id: pushDockerImages
         run: |
           IMAGES=()
+          echo "# Docker Images >> $GITHUB_STEP_SUMMARY"
+          echo "| Image Name | >> $GITHUB_STEP_SUMMARY"
+          echo "| - | >> $GITHUB_STEP_SUMMARY"
           for directory in `find * -maxdepth 10 -mindepth 0 -type f -name 'Dockerfile' | xargs dirname`
           do
             echo Run docker build for $directory
@@ -177,6 +180,7 @@ jobs:
             -t ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }} \
             -t ghcr.io/${GITHUB_REPOSITORY}/$image:latest \
             $directory
+            echo "| ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }} | >> $GITHUB_STEP_SUMMARY"
             IMAGES+=(\"ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }}\")
           done
           # Convert the array to a JSON string
@@ -310,7 +314,7 @@ jobs:
           scan-type: image
           hide-progress: true
           format: 'template'
-          template: '@/.config/tirvy/template.tpl'
+          template: 'dotconfig/tirvy/template.tpl'
           exit-code: '0'
           ignore-unfixed: true
           vuln-type: 'os,library'
