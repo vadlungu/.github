@@ -296,6 +296,22 @@ jobs:
           TRIVY_USERNAME: ${GITHUB_ACTOR}
           TRIVY_PASSWORD: ${{ secrets.ORGANIZATION_TOKEN }}
 
+      - name: Trivy template vulnerability test
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ matrix.image }}
+          scan-type: image
+          hide-progress: true
+          format: 'template'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          output: 'dependency-results.sbom.json'
+          github-pat: ${{ secrets.ORGANIZATION_TOKEN }}
+        env:
+          TRIVY_USERNAME: ${GITHUB_ACTOR}
+          TRIVY_PASSWORD: ${{ secrets.ORGANIZATION_TOKEN }}
       #- name: Test img outputs
       #  run: |
       #    echo ${{ needs.push.outputses }}
