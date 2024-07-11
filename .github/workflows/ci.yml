@@ -51,6 +51,12 @@ env:
     }}
 
 jobs:
+  test:
+    name: test job
+    runs-on: ubuntu-latest
+    steps:
+      - name: test
+        run: echo '### Hello world! 🚀' >> $GITHUB_STEP_SUMMARY
   build:
     name: Build (${{ matrix.arch }}) and mvn verify ${{ matrix.mvn-verify-opts }}
     runs-on: ubuntu-latest
@@ -304,7 +310,7 @@ jobs:
           scan-type: image
           hide-progress: true
           format: 'template'
-          template: '@/contrib/custom.tpl'
+          template: '@/.config/tirvy/template.tpl'
           exit-code: '0'
           ignore-unfixed: true
           vuln-type: 'os,library'
