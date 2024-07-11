@@ -334,7 +334,7 @@ jobs:
       #    echo "##############################"
       #    echo ${{ fromJson(needs.build.outputs.images) }}
       - name: Verify Trivy Installation
-        run: echo "```json ${cat dependency-results.sbom.json```" >> $GITHUB_STEP_SUMMARY
+        run: cat dependency-results.sbom.json
           
 
       - name: Install Trivy
