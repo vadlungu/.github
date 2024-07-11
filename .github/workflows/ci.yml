@@ -318,12 +318,12 @@ jobs:
           scan-type: image
           hide-progress: true
           format: 'template'
-          template: 'dotconfig/tirvy/template.tpl'
+          template: '@dotconfig/tirvy/template.tpl'
           exit-code: '0'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
-          output: 'dependency-results.sbom.json'
+          output: 'scan-results.md'
           github-pat: ${{ secrets.ORGANIZATION_TOKEN }}
         env:
           TRIVY_USERNAME: ${GITHUB_ACTOR}
@@ -334,7 +334,7 @@ jobs:
       #    echo "##############################"
       #    echo ${{ fromJson(needs.build.outputs.images) }}
       - name: Verify Trivy Installation
-        run: cat dependency-results.sbom.json
+        run: cat scan-results.md
           
 
       - name: Install Trivy

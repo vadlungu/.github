@@ -12,12 +12,13 @@
   {{- end }}
 {{- end }}
 
+| VulnerabilityID | Severity |
+| - | - |
 {{- range .}}
   {{- range .Vulnerabilities }}
-  {{ .VulnerabilityID }} =  {{ .Severity }}
+  | {{ .VulnerabilityID }} |  {{ .Severity }} |
   {{- end }}
 {{- end }}
-
-Critical: {{ $critical }}, 
-High: {{ $high }}
+| Total Critical | {{ $critical }} | 
+| Total High | {{ $high }} |
 
