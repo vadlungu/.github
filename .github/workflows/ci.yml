@@ -191,7 +191,7 @@ jobs:
             -t ghcr.io/${GITHUB_REPOSITORY}/$image:${{ env.VERSION }} \
             -t ghcr.io/${GITHUB_REPOSITORY}/$image:latest \
             $directory
-            echo "| ghcr.io/${github_repository}/$image:${{ env.version }} |" >> $github_step_summary
+            echo "| ghcr.io/${github_repository}/$image:${{ env.version }} |" >> $GITHUB_STEP_SUMMARY
             images+=(\"ghcr.io/${github_repository}/$image:${{ env.version }}\")
           done
           # Convert the array to a JSON string
