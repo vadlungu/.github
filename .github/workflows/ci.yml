@@ -353,7 +353,7 @@ jobs:
           hide-progress: true
           format: 'template'
           template: '@template.tpl'
-          exit-code: {{ inputs.fail-on-vulnerability-issues }}
+          exit-code: "{{ inputs.fail-on-vulnerability-issues }}"
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
