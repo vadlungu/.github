@@ -26,12 +26,12 @@ on:
         required: false
         default: "['']"
       fail-on-vulnerability-issues:
-        type: boolean
+        type: string
         required: false
-        default: false
+        default: '0'
         description: |
           Fail pipeline if CVEs are identified.
-          Default is 'fasle'.
+          Default is '0', possible values '0' or '1'
     secrets:
       ORGANIZATION_TOKEN:
         required: true
@@ -353,7 +353,7 @@ jobs:
           hide-progress: true
           format: 'template'
           template: '@template.tpl'
-          exit-code: '{{ inputs.fail-on-vulnerability-issues}}'
+          exit-code: '{{ inputs.fail-on-vulnerability-issues }}'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
