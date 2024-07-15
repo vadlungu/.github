@@ -353,7 +353,7 @@ jobs:
           hide-progress: true
           format: 'template'
           template: '@template.tpl'
-          exit-code: '{{ inputs.fail-on-vulnerability-issues }}'
+          exit-code: {{ inputs.fail-on-vulnerability-issues }}
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
@@ -381,4 +381,5 @@ jobs:
       - name: Scan Docker image with Trivy
         run: |
           echo "Scanning ${{ matrix.image }}"
+          echo "check fail CI FLAG ${{ inputs.fail-on-vulnerability-issues }}"
           trivy image --severity CRITICAL,HIGH ${{ matrix.image }}
